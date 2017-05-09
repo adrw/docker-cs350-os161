@@ -19,22 +19,9 @@ build: init
 rebuild: init
 	bash -c "$$DOCKER_NICE build --no-cache"
 
-compile: init
-	bash -c "$$DOCKER_NICE run app webpack"
-
-add:
-	bash -c "git add ."
-
-commit: add
-	@read -p "Enter commit message: " message; \
-	git commit -am "$$message"
-
-deploy: add commit
-	git push
-
 run: init
 	bash -c "$$DOCKER_NICE up"
-	bash -c "docker run -it -v $(shell pwd)/src:/root/cs350-os161 --entrypoint /bin/bash docker161_api"
+	bash -c "docker run -it -v $(shell pwd)/src:/root/cs350-os161 --entrypoint /bin/bash andrewparadi/os161"
 
 down:
 	bash -c "$$DOCKER_NICE down"
@@ -42,5 +29,4 @@ down:
 .PHONY: init
 .PHONY: build
 .PHONY: rebuild
-.PHONY: compile
 .PHONY: run

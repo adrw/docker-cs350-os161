@@ -72,4 +72,4 @@ WORKDIR /root
 RUN rm -rf /root/cs350
 
 # make sure to start commands in the os161 folder
-WORKDIR /root/cs350-os161/os161-1.99
+WORKDIR /root/cs350-os161

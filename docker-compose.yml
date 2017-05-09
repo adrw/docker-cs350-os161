@@ -2,7 +2,9 @@ version: '2'
 services:
 
   api:
-    build:
-      context: ./
-      dockerfile: Dockerfile
-    container_name: docker161_api
+    image: andrewparadi/os161:latest
+    # Comment out image ^, uncomment below to build image for yourself
+    # build:
+    #   context: ./
+    #   dockerfile: Dockerfile
+    container_name: docker-os161
