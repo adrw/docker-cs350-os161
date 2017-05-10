@@ -1,10 +1,8 @@
 version: '2'
 services:
 
-  api:
-    # image: andrewparadi/os161:latest
-    # Comment out image ^, uncomment below to build image for yourself
+  debian:
     build:
       context: ./
       dockerfile: Dockerfile
-    container_name: docker-os161
+    container_name: andrewparadi/os161
