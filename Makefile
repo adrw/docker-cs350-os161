@@ -11,17 +11,18 @@ export DOCKER_NICE
 default: run
 
 init:
-	bash -c "./setup.sh"
 
-build: init
+build:
 	bash -c "$$DOCKER_NICE build"
+	bash -c "docker run -it -v $(shell pwd)/src:/root/cs350-os161 --entrypoint /bin/bash dockeros161_api"
 
-rebuild: init
+rebuild:
 	bash -c "$$DOCKER_NICE build --no-cache"
+	bash -c "docker run -it -v $(shell pwd)/src:/root/cs350-os161 --entrypoint /bin/bash dockeros161_api"
 
 run: init
 	bash -c "$$DOCKER_NICE up"
-	bash -c "docker run -it -v $(shell pwd)/src:/root/cs350-os161 --entrypoint /bin/bash andrewparadi/os161"
+	bash -c "docker run -it -v $(shell pwd)/src:/root/cs350-os161 --entrypoint /bin/bash andrewparadi/os161:latest"
 
 down:
 	bash -c "$$DOCKER_NICE down"

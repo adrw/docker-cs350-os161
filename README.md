@@ -1,4 +1,4 @@
-CS350 Docker os161 Environment
+os161 Environment for University of Waterloo CS350
 ---
 
 Getting Started
