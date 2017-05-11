@@ -3,7 +3,7 @@
 mainDir=cs350-work
 srcDir=cs350-work/src
 
-if [ ${HOME:0:3} == "/u/" ]; then
+if [[ $HOME == /u* ]]; then
   #University of Waterloo server
   srcDir=cs350-os161
 fi
@@ -40,15 +40,11 @@ if [[ ! -f ./$srcDir/submit.sh ]]; then
   chmod +x ./$srcDir/submit.sh
 fi
 
-if [ ! ${HOME:0:3} == "/u/" ]; then
+if [[ $HOME == /u* ]]; then
   if [[ ! -f ./$mainDir/Makefile ]]; then
     wget https://raw.githubusercontent.com/andrewparadi/docker-os161/master/Makefile -O ./$mainDir/Makefile
   fi
 
-  if [[ ! -f ./$mainDir/install-build-requirements.sh ]]; then
-    wget https://raw.githubusercontent.com/andrewparadi/docker-os161/master/install-build-requirements.sh -O ./$mainDir/install-build-requirements.sh
-  fi
-
   # get the prebuilt Docker image
-  docker pull andrewparadi/os161:latest
+  docker pull andrewparadi/cs350-os161:latest
 fi
