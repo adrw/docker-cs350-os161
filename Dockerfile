@@ -1,6 +1,6 @@
 FROM debian:7
-MAINTAINER Anthony Zhang <azhang9@gmail.com>
 MAINTAINER Andrew Paradi <me@andrewparadi.com>
+MAINTAINER Anthony Zhang <azhang9@gmail.com>
 
 # this basically sets up a Docker image according to the instructions on https://www.student.cs.uwaterloo.ca/~build/common/Install161NonCS.html
 # a copy of that page is also included in this repository in case the URL ever changes or goes down
@@ -9,10 +9,7 @@ MAINTAINER Andrew Paradi <me@andrewparadi.com>
 RUN apt-get update
 RUN apt-get install software-properties-common --yes
 RUN apt-get update
-RUN add-apt-repository ppa:ubuntu-toolchain-r/test
 RUN apt-get install build-essential --yes
-RUN apt-get install gcc-4.9 --yes
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 50 # compile everything with GCC 4.9
 
 # step 1: download all of the files listed in the Step 1 table on the instructions page into the current folder
 
@@ -26,6 +23,7 @@ RUN make install
 # step 3: put sys161 stuff on the PATH
 RUN mkdir /root/sys161/bin
 ENV PATH /root/sys161/bin:/root/sys161/tools/bin:$PATH
+RUN echo "export PATH=$PATH" > $HOME/.bashrc
 
 # step 4: install GCC MIPS cross-compiler
 ADD os161-gcc.tar.gz /root/cs350

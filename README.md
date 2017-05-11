@@ -29,4 +29,5 @@ Docker Image
 
 Resources
 ---
+- [Image on Docker Hub](https://hub.docker.com/r/andrewparadi/os161/)
 - [Uberi/uw-cs350-development-environment](https://github.com/Uberi/uw-cs350-development-environment)

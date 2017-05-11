@@ -1,8 +1,8 @@
 version: '2'
 services:
 
-os161:
-  build:
-    context: ./
-    dockerfile: Dockerfile
-  container_name: andrewparadi/os161
+  os161:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: andrewparadi/os161
