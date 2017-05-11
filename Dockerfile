@@ -1,4 +1,5 @@
-FROM debian:latest
+FROM debian:7
+MAINTAINER Anthony Zhang <azhang9@gmail.com>
 MAINTAINER Andrew Paradi <me@andrewparadi.com>
 
 # this basically sets up a Docker image according to the instructions on https://www.student.cs.uwaterloo.ca/~build/common/Install161NonCS.html

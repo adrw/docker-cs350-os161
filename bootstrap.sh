@@ -42,8 +42,11 @@ fi
 
 if [ ! ${HOME:0:3} == "/u/" ]; then
   if [[ ! -f ./$mainDir/Makefile ]]; then
-    # get useful makefile
     wget https://raw.githubusercontent.com/andrewparadi/docker-os161/master/Makefile -O ./$mainDir/Makefile
+  fi
+
+  if [[ ! -f ./$mainDir/install-build-requirements.sh ]]; then
+    wget https://raw.githubusercontent.com/andrewparadi/docker-os161/master/install-build-requirements.sh -O ./$mainDir/install-build-requirements.sh
   fi
 
   # get the prebuilt Docker image
