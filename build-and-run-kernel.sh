@@ -13,20 +13,24 @@ sys161dir="/root/sys161"
 function show_help {
   echo "{ }   {default: builds from source, runs with gdb in Tmux}"
   echo "-b    {only build, don't run after}"
+  echo "-c    {continuous build loop}"
+  echo "-m    {only run, with gdb tmux}"
   echo "-r    {only run, don't build, don't run with gdb}"
   echo "-t {} {run test {testcode} }"
-  echo "-l    {loop test 100 times and log result}"
-  echo "-c    {clear all logs}"
+  echo "-l {} {loop test {x} times and log result}"
+  echo "-w    {clear all logs}"
   exit 0
 }
 
 div="*************************"
 DEFAULT=true
 BUILD=false
+CONT_BUILD=false
+MUX=false
 RUN=false
 TEST=false
 LOOP=false
-while getopts "h?:brlct:" opt; do
+while getopts "h?:bcmrwt:l:" opt; do
     case "$opt" in
     h|\?)
         show_help
@@ -36,15 +40,24 @@ while getopts "h?:brlct:" opt; do
         BUILD=true
         echo "Option Registered: build"
         ;;
+    c)  DEFAULT=false
+        BUILD=true
+        CONT_BUILD=true
+        echo "Option Registered: continuous build"
+        ;;
+    m)  DEFAULT=false
+        MUX=true
+        echo "Option Registered: run with gdb tmux"
+        ;;
     r)  DEFAULT=false
         RUN=true
         echo "Option Registered: run"
         ;;
-    l)  LOOP=true
-        echo "Option Registered: loop"
+    l)  LOOP=$OPTARG
+        echo "Option Registered: loop test ${LOOP} times"
         ;;
-    c)  rm $cs350dir/log/*.log
-        echo "Option Registered: clear logs"
+    w)  rm $cs350dir/log/*.log
+        echo "Option Registered: wipe logs"
         exit 0
         ;;
     t)  TEST=$OPTARG
@@ -69,30 +82,34 @@ ASSIGNMENT=ASST1
 echo "${div} os161 :: ${ASSIGNMENT} ${div}"
 
 if [[ "$DEFAULT" == true || "$BUILD" == true ]]; then
-  # copy in the SYS/161 default configuration
-  mkdir --parents $cs350dir/root
-  cp --update $sys161dir/share/examples/sys161/sys161.conf.sample $cs350dir/root/sys161.conf
+  for (( ; ; )); do
+    # copy in the SYS/161 default configuration
+    mkdir --parents $cs350dir/root
+    cp --update $sys161dir/share/examples/sys161/sys161.conf.sample $cs350dir/root/sys161.conf
 
-  # build kernel
-  cd $cs350dir/os161-1.99
-  ./configure --ostree=$cs350dir/root --toolprefix=cs350-
-  cd $cs350dir/os161-1.99/kern/conf
-  ./config $ASSIGNMENT
-  cd $cs350dir/os161-1.99/kern/compile/$ASSIGNMENT
-  bmake depend
-  bmake
-  bmake install
+    # build kernel
+    cd $cs350dir/os161-1.99
+    ./configure --ostree=$cs350dir/root --toolprefix=cs350-
+    cd $cs350dir/os161-1.99/kern/conf
+    ./config $ASSIGNMENT
+    cd $cs350dir/os161-1.99/kern/compile/$ASSIGNMENT
+    bmake depend
+    bmake
+    bmake install
 
-  # build user-level programs
-  cd $cs350dir/os161-1.99
-  bmake
-  bmake install
+    # build user-level programs
+    cd $cs350dir/os161-1.99
+    bmake
+    bmake install
 
-  cd $cs350dir/root
+    if [[ "$CONT_BUILD" == false ]]; then
+      break
+    fi
+  done
 fi
 
 
-if [[ "$DEFAULT" == true ]]; then
+if [[ "$DEFAULT" == true || "$MUX" == true ]]; then
   # set up the simulator run
   cd $cs350dir/root
   if ! which tmux &> /dev/null; then
@@ -120,7 +137,7 @@ function show_test_help {
   echo "Use any of the following test codes in ./build-and-run.sh -t {test code}"
   echo "lock    l   {test locks with sy2}"
   echo "convar  cv  {test conditional variables with sy3}"
-  echo "traffic t   {A1 test for traffic simulation with 5 10 1 2 0 params}"
+  echo "traffic t   {A1 test for traffic simulation with 4 15 0 1 0 params}"
   exit 0
 }
 
@@ -133,6 +150,8 @@ if [[ "$TEST" != false ]]; then
 
   cd $cs350dir/root
 
+  TEST_TYPE=default
+
   case $TEST in
     l|lock)     echo "${div} ${start_test} Lock ${div}"
                 test_command="sy2;q"
@@ -142,28 +161,34 @@ if [[ "$TEST" != false ]]; then
                 test_command="sy3;q"
                 log_filename+="cond-var${log_ext}"
                 ;;
-    t|traffic)  echo "${div} ${start_test} A1 Traffic ${div}"
-                test_command="sp3 5 10 1 2 0;q"
+    t|traffic)  echo "${div} ${start_test} A1 Traffic 4 15 0 1 0 ${div}"
+                test_command="sp3 4 15 0 1 0;q"
                 log_filename+="traffic${log_ext}"
+                TEST_TYPE=sim
                 ;;
     *|h|\?)     show_test_help
                 exit 0
                 ;;
   esac
 
-  if [[ "$LOOP" == true ]]; then
+  if [[ "$LOOP" != false ]]; then
     mkdir -p $cs350dir/log
     logfile=$cs350dir/log/$log_filename
     echo -n "1"
-    for i in {1..100}
+    denom=$((LOOP / 80))
+    for i in $(seq 1 $LOOP)
     do
-      [ $((i%2)) -eq 0 ] && echo -n "."
-      echo "${div} ${i} of 100 ${div}" >> $logfile
+      [ $((i%denom)) -eq 0 ] && echo -n "."
+      echo "${div} ${i} of ${LOOP} ${div}" >> $logfile
       sys161 kernel-$ASSIGNMENT "${test_command}" &>> $logfile
       echo "" >> $logfile
     done
     echo $i
-    success=$(grep -o "done" ${logfile} | wc -w)
+    if [[ "$TEST_TYPE" == "sim" ]]; then
+      success=$(grep -o "Simulation" ${logfile} | wc -w)
+    else
+      success=$(grep -o "done" ${logfile} | wc -w)
+    fi
   else
     sys161 kernel-$ASSIGNMENT "${test_command}"
     i=1
