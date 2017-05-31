@@ -22,7 +22,12 @@ function show_help {
   exit 0
 }
 
-div="*************************"
+div="***************************************************************************"
+function status {
+  echo ""
+  echo "[ ${1} ] ${div:${#1}}"
+}
+
 DEFAULT=true
 BUILD=false
 CONT_BUILD=false
@@ -56,8 +61,9 @@ while getopts "h?:bcmrwt:l:" opt; do
     l)  LOOP=$OPTARG
         echo "Option Registered: loop test ${LOOP} times"
         ;;
-    w)  rm $cs350dir/log/*.log
+    w)  touch $cs350dir/log/tmp.log; rm $cs350dir/log/*.log
         echo "Option Registered: wipe logs"
+        status "Logs Cleared"
         exit 0
         ;;
     t)  TEST=$OPTARG
@@ -79,7 +85,7 @@ if ! grep docker /proc/1/cgroup -qa; then
 fi
 
 ASSIGNMENT=ASST1
-echo "${div} os161 :: ${ASSIGNMENT} ${div}"
+status "os161 :: ${ASSIGNMENT}"
 
 if [[ "$DEFAULT" == true || "$BUILD" == true ]]; then
   for (( ; ; )); do
@@ -153,15 +159,15 @@ if [[ "$TEST" != false ]]; then
   TEST_TYPE=default
 
   case $TEST in
-    l|lock)     echo "${div} ${start_test} Lock ${div}"
+    l|lock)     status "${start_test} Lock "
                 test_command="sy2;q"
                 log_filename+="lock${log_ext}"
                 ;;
-    cv|convar)  echo "${div} ${start_test} Conditional Variable ${div}"
+    cv|convar)  status "${start_test} Conditional Variable "
                 test_command="sy3;q"
                 log_filename+="cond-var${log_ext}"
                 ;;
-    t|traffic)  echo "${div} ${start_test} A1 Traffic 4 15 0 1 0 ${div}"
+    t|traffic)  status "${start_test} A1 Traffic 4 15 0 1 0 "
                 test_command="sp3 4 15 0 1 0;q"
                 log_filename+="traffic${log_ext}"
                 TEST_TYPE=sim
@@ -175,11 +181,16 @@ if [[ "$TEST" != false ]]; then
     mkdir -p $cs350dir/log
     logfile=$cs350dir/log/$log_filename
     echo -n "1"
-    denom=$((LOOP / 80))
+    denom=$((LOOP / 75 + 1))
+    chunk_char="."
+    chunk_size=$((75 / LOOP - 1))
+    chunk=$chunk_char
+    for i in $(seq 1 $chunk_size); do chunk+=$chunk_char; done
     for i in $(seq 1 $LOOP)
     do
-      [ $((i%denom)) -eq 0 ] && echo -n "."
-      echo "${div} ${i} of ${LOOP} ${div}" >> $logfile
+      [ $denom -eq 0 ] && echo -n $chunk
+      [ $denom -ne 0 ] && [ $((i%denom)) -eq 0 ] && echo -n $chunk
+      status "${i} of ${LOOP}" >> $logfile
       sys161 kernel-$ASSIGNMENT "${test_command}" &>> $logfile
       echo "" >> $logfile
     done
@@ -194,6 +205,5 @@ if [[ "$TEST" != false ]]; then
     i=1
     success=1
   fi
-
-  echo "${div} Test :: Finished ${success} / $i ${div}"
+  status "Test :: Finished ${success} / $i"
 fi
