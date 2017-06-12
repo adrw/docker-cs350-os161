@@ -8,7 +8,7 @@ endef
 
 export DOCKER_NICE
 
-default: run
+default: pull
 
 init:
 
@@ -27,6 +27,10 @@ rebuild: build_init
 	bash -c "docker run -it -v $(shell pwd)/src:/root/cs350-os161 --entrypoint /bin/bash cs350work_os161"
 
 run: init
+	bash -c "docker run -it -v $(shell pwd)/src:/root/cs350-os161 --entrypoint /bin/bash andrewparadi/cs350-os161:latest"
+
+pull: init
+	bash -c "docker pull andrewparadi/cs350-os161:latest"
 	bash -c "docker run -it -v $(shell pwd)/src:/root/cs350-os161 --entrypoint /bin/bash andrewparadi/cs350-os161:latest"
 
 down:
