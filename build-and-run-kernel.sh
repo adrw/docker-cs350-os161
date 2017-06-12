@@ -9,18 +9,7 @@ set -o pipefail # for a pipeline, if any of the commands fail with a non-zero ex
 
 cs350dir="/root/cs350-os161"
 sys161dir="/root/sys161"
-
-function show_help {
-  echo "{ }   {default: builds from source, runs with gdb in Tmux}"
-  echo "-b    {only build, don't run after}"
-  echo "-c    {continuous build loop}"
-  echo "-m    {only run, with gdb tmux}"
-  echo "-r    {only run, don't build, don't run with gdb}"
-  echo "-t {} {run test {testcode} }"
-  echo "-l {} {loop test {x} times and log result}"
-  echo "-w    {clear all logs}"
-  exit 0
-}
+ASSIGNMENT=ASST2
 
 div="***************************************************************************"
 function status {
@@ -28,14 +17,48 @@ function status {
   echo "[ ${1} ] ${div:${#1}}"
 }
 
+function show_help {
+  status "Help :: Build and Run Options"
+  echo "{ }   {default: builds from source, runs with gdb in Tmux}"
+  echo "-b    {only build, don't run after}"
+  echo "-c    {continuous build loop}"
+  echo "-m    {only run, with gdb tmux}"
+  echo "-r    {only run, don't build, don't run with gdb}"
+  echo "-p {} {run user program {program name | program alias} }"
+  echo "-t {} {run test {test alias} }"
+  echo "-l {} {loop test {test alias} times and log result}"
+  echo "-w    {clear all logs}"
+  echo ""
+  exit 0
+}
+
+function show_program_help {
+  status "Help :: User Program Aliases"
+  echo "Run a user program ./build-and-run.sh -p {program name | program alias}"
+  echo "fork    f   {uw-testbin/onefork}"
+  echo ""
+  status ""
+}
+
+function show_test_help {
+  status "Help :: Test Aliases"
+  echo "Use any of the following test codes in ./build-and-run.sh -t {test code} -l {# of loops}"
+  echo "lock    l   {test locks with sy2}"
+  echo "convar  cv  {test conditional variables with sy3}"
+  echo "traffic t   {A1 test for traffic simulation with 4 15 0 1 0 params}"
+  echo ""
+  exit 0
+}
+
 DEFAULT=true
 BUILD=false
 CONT_BUILD=false
 MUX=false
 RUN=false
+PROGRAM=false
 TEST=false
 LOOP=false
-while getopts "h?:bcmrwt:l:" opt; do
+while getopts "h?:bcmrwp:t:l:" opt; do
     case "$opt" in
     h|\?)
         show_help
@@ -58,6 +81,10 @@ while getopts "h?:bcmrwt:l:" opt; do
         RUN=true
         echo "Option Registered: run"
         ;;
+    p)  PROGRAM=$OPTARG
+        DEFAULT=false
+        echo "Option Registered: program ${PROGRAM}"
+        ;;
     l)  LOOP=$OPTARG
         echo "Option Registered: loop test ${LOOP} times"
         ;;
@@ -73,6 +100,7 @@ while getopts "h?:bcmrwt:l:" opt; do
         ;;
     esac
 done
+shift $((OPTIND-1))
 
 # display an error if we're not running inside a Docker container
 if ! grep docker /proc/1/cgroup -qa; then
@@ -84,7 +112,6 @@ if ! grep docker /proc/1/cgroup -qa; then
   fi
 fi
 
-ASSIGNMENT=ASST1
 status "os161 :: ${ASSIGNMENT}"
 
 if [[ "$DEFAULT" == true || "$BUILD" == true ]]; then
@@ -114,7 +141,6 @@ if [[ "$DEFAULT" == true || "$BUILD" == true ]]; then
   done
 fi
 
-
 if [[ "$DEFAULT" == true || "$MUX" == true ]]; then
   # set up the simulator run
   cd $cs350dir/root
@@ -138,14 +164,24 @@ elif [[ "$RUN" == true ]]; then
   sys161 kernel-$ASSIGNMENT
 fi
 
-function show_test_help {
-  echo "### INVALID TEST CODE ###"
-  echo "Use any of the following test codes in ./build-and-run.sh -t {test code}"
-  echo "lock    l   {test locks with sy2}"
-  echo "convar  cv  {test conditional variables with sy3}"
-  echo "traffic t   {A1 test for traffic simulation with 4 15 0 1 0 params}"
-  exit 0
-}
+if [[ "$PROGRAM" != false ]]; then
+  status "Starting ${PROGRAM}"
+  cd $cs350dir/root
+
+  start_program="Program ::"
+  program_command=""
+
+  case $PROGRAM in
+    f|fork)     status "${start_program} uw-testbin/onefork "
+                program_command="uw-testbin/onefork;q"
+                ;;
+    *|h|\?)     show_program_help
+                program_command="${PROGRAM};q"
+                ;;
+  esac
+
+  sys161 kernel-$ASSIGNMENT "p ${program_command}"
+fi
 
 if [[ "$TEST" != false ]]; then
   log_ext=".log"
@@ -207,3 +243,5 @@ if [[ "$TEST" != false ]]; then
   fi
   status "Test :: Finished ${success} / $i"
 fi
+
+exit 0
