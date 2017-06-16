@@ -40,7 +40,7 @@ if [[ ! -f ./$srcDir/submit.sh ]]; then
   chmod +x ./$srcDir/submit.sh
 fi
 
-if [[ $HOME == /u* ]]; then
+if [[ "$HOME" != /u* ]]; then
   if [[ ! -f ./$mainDir/Makefile ]]; then
     wget https://raw.githubusercontent.com/andrewparadi/docker-os161/master/Makefile -O ./$mainDir/Makefile
   fi

@@ -10,6 +10,10 @@ set -o pipefail # for a pipeline, if any of the commands fail with a non-zero ex
 cs350dir="/root/cs350-os161"
 sys161dir="/root/sys161"
 ASSIGNMENT=ASST2
+TEST=false
+LOOP=false
+OPTIONS=false
+DEBUG=false
 
 div="***************************************************************************"
 function status {
@@ -19,129 +23,69 @@ function status {
 
 function show_help {
   status "Help :: Build and Run Options"
-  echo "{ }   {default: builds from source, runs with gdb in Tmux}"
-  echo "-b    {only build, don't run after}"
-  echo "-c    {continuous build loop}"
-  echo "-m    {only run, with gdb tmux}"
-  echo "-r    {only run, don't build, don't run with gdb}"
-  echo "-p {} {run user program {program name | program alias} }"
-  echo "-t {} {run test {test alias} }"
-  echo "-l {} {loop test {test alias} times and log result}"
-  echo "-w    {clear all logs}"
+  echo "{ }       { default: builds from source, runs with gdb in Tmux }"
+  echo "-b        { only build, don't run after }"
+  echo "-c        { continuous build loop }"
+  echo "-d        { set debug mode }"
+  echo "-m        { only run, with gdb tmux panels }"
+  echo "-r        { only run, don't build, don't run with gdb }"
+  echo "-t {}     { run test {test alias}  }"
+  echo "-l {}     { loop all following tests {#} times and log result }"
+  echo "-w        { clear all logs }"
   echo ""
-  exit 0
-}
-
-function show_program_help {
-  status "Help :: User Program Aliases"
-  echo "Run a user program ./build-and-run.sh -p {program name | program alias}"
-  echo "fork    f   {uw-testbin/onefork}"
-  echo ""
-  status ""
 }
 
 function show_test_help {
   status "Help :: Test Aliases"
-  echo "Use any of the following test codes in ./build-and-run.sh -t {test code} -l {# of loops}"
-  echo "lock    l   {test locks with sy2}"
-  echo "convar  cv  {test conditional variables with sy3}"
-  echo "traffic t   {A1 test for traffic simulation with 4 15 0 1 0 params}"
+  echo "./build-and-run.sh -l {# of loops} -t {test name | code} -t {..."
+  echo "lock        l   { test locks with sy2 }"
+  echo "convar      cv  { test conditional variables with sy3 }"
+  echo "traffic     t   { A1 test for traffic simulation with 4 15 0 1 0 params }"
+  echo "onefork     2aa { uw-testbin/onefork }"
+  echo "pidcheck    2ab { uw-testbin/pidcheck }"
+  echo "widefork    2ac { uw-testbin/widefork }"
+  echo "forktest    2ad { testbin/forktest }"
   echo ""
-  exit 0
 }
-
-DEFAULT=true
-BUILD=false
-CONT_BUILD=false
-MUX=false
-RUN=false
-PROGRAM=false
-TEST=false
-LOOP=false
-while getopts "h?:bcmrwp:t:l:" opt; do
-    case "$opt" in
-    h|\?)
-        show_help
-        exit 0
-        ;;
-    b)  DEFAULT=false
-        BUILD=true
-        echo "Option Registered: build"
-        ;;
-    c)  DEFAULT=false
-        BUILD=true
-        CONT_BUILD=true
-        echo "Option Registered: continuous build"
-        ;;
-    m)  DEFAULT=false
-        MUX=true
-        echo "Option Registered: run with gdb tmux"
-        ;;
-    r)  DEFAULT=false
-        RUN=true
-        echo "Option Registered: run"
-        ;;
-    p)  PROGRAM=$OPTARG
-        DEFAULT=false
-        echo "Option Registered: program ${PROGRAM}"
-        ;;
-    l)  LOOP=$OPTARG
-        echo "Option Registered: loop test ${LOOP} times"
-        ;;
-    w)  touch $cs350dir/log/tmp.log; rm $cs350dir/log/*.log
-        echo "Option Registered: wipe logs"
-        status "Logs Cleared"
-        exit 0
-        ;;
-    t)  TEST=$OPTARG
-        DEFAULT=false
-        echo "Option Registered: test ${TEST}"
-        # BUILD=true
-        ;;
-    esac
-done
-shift $((OPTIND-1))
 
 # display an error if we're not running inside a Docker container
 if ! grep docker /proc/1/cgroup -qa; then
   cs350dir="$HOME/cs350-os161"
   sys161dir="/u/cs350/sys161"
   if [[ ! $HOME == /u* ]]; then
-    echo 'ERROR: PLEASE RUN THIS SCRIPT ON UW ENVIRONMENT OR IN DOCKER CONTAINER'
+    status 'ERROR :: PLEASE RUN THIS SCRIPT ON UW ENVIRONMENT OR DOCKER CONTAINER'
     exit 1
   fi
 fi
 
-status "os161 :: ${ASSIGNMENT}"
+function run_build {
+  # copy in the SYS/161 default configuration
+  mkdir --parents $cs350dir/root
+  cp --update $sys161dir/share/examples/sys161/sys161.conf.sample $cs350dir/root/sys161.conf
 
-if [[ "$DEFAULT" == true || "$BUILD" == true ]]; then
+  # build kernel
+  cd $cs350dir/os161-1.99
+  ./configure --ostree=$cs350dir/root --toolprefix=cs350-
+  cd $cs350dir/os161-1.99/kern/conf
+  ./config $ASSIGNMENT
+  cd $cs350dir/os161-1.99/kern/compile/$ASSIGNMENT
+  bmake depend
+  bmake
+  bmake install
+
+  # build user-level programs
+  cd $cs350dir/os161-1.99
+  bmake
+  bmake install
+}
+
+function run_continuous_build {
   for (( ; ; )); do
-    # copy in the SYS/161 default configuration
-    mkdir --parents $cs350dir/root
-    cp --update $sys161dir/share/examples/sys161/sys161.conf.sample $cs350dir/root/sys161.conf
-
-    # build kernel
-    cd $cs350dir/os161-1.99
-    ./configure --ostree=$cs350dir/root --toolprefix=cs350-
-    cd $cs350dir/os161-1.99/kern/conf
-    ./config $ASSIGNMENT
-    cd $cs350dir/os161-1.99/kern/compile/$ASSIGNMENT
-    bmake depend
-    bmake
-    bmake install
-
-    # build user-level programs
-    cd $cs350dir/os161-1.99
-    bmake
-    bmake install
-
-    if [[ "$CONT_BUILD" == false ]]; then
-      break
-    fi
+    run_build
   done
-fi
+}
 
-if [[ "$DEFAULT" == true || "$MUX" == true ]]; then
+function run_tmux {
   # set up the simulator run
   cd $cs350dir/root
   if ! which tmux &> /dev/null; then
@@ -159,89 +103,151 @@ if [[ "$DEFAULT" == true || "$MUX" == true ]]; then
   tmux send-keys -t os161:0.1 'target remote unix:.sockets/gdb' C-m # in GDB, connect to SYS/161
   tmux send-keys -t os161:0.1 'c' # in GDB, fill in the continue command automatically so the user can just press Enter to continue
   tmux attach-session -t os161 # attach to the tmux session
-elif [[ "$RUN" == true ]]; then
+}
+
+function run_only {
   cd $cs350dir/root
-  sys161 kernel-$ASSIGNMENT
-fi
+  sys161 kernel-$ASSIGNMENT "$1"
+}
 
-if [[ "$PROGRAM" != false ]]; then
-  status "Starting ${PROGRAM}"
-  cd $cs350dir/root
+function run_loop {
+  mkdir -p $cs350dir/log
+  logfile=$cs350dir/log/$log_filename
+  echo $logfile
+  echo -n "1"
+  denom=$((LOOP / 75 + 1))
+  chunk_char="."
+  chunk_size=$((75 / LOOP - 1))
+  chunk=$chunk_char
+  for i in $(seq 1 $chunk_size); do chunk+=$chunk_char; done
+  for i in $(seq 1 $LOOP)
+  do
+    [ $denom -eq 0 ] && echo -n $chunk
+    [ $denom -ne 0 ] && [ $((i%denom)) -eq 0 ] && echo -n $chunk
+    status "${i} of ${LOOP}" >> $logfile
+    sys161 kernel-$ASSIGNMENT "${test_command}" &>> $logfile
+    echo "" >> $logfile
+  done
+  echo $i
+  success=$(grep -o "${success_word}" ${logfile} | wc -w)
+}
 
-  start_program="Program ::"
-  program_command=""
-
-  case $PROGRAM in
-    f|fork)     status "${start_program} uw-testbin/onefork "
-                program_command="uw-testbin/onefork;q"
-                ;;
-    *|h|\?)     show_program_help
-                program_command="${PROGRAM};q"
-                ;;
-  esac
-
-  sys161 kernel-$ASSIGNMENT "p ${program_command}"
-fi
-
-if [[ "$TEST" != false ]]; then
+function run_test {
   log_ext=".log"
   log_filename="`date '+%Y%m%d-%H%M%S'`-"
 
   start_test="Test ::"
   test_command=""
+  pre_command=""
+  if [[ "$DEBUG" == true ]]; then
+    pre_command="dl 8192; "
+  fi
 
   cd $cs350dir/root
 
-  TEST_TYPE=default
-
   case $TEST in
-    l|lock)     status "${start_test} Lock "
-                test_command="sy2;q"
-                log_filename+="lock${log_ext}"
-                ;;
-    cv|convar)  status "${start_test} Conditional Variable "
-                test_command="sy3;q"
-                log_filename+="cond-var${log_ext}"
-                ;;
-    t|traffic)  status "${start_test} A1 Traffic 4 15 0 1 0 "
-                test_command="sp3 4 15 0 1 0;q"
-                log_filename+="traffic${log_ext}"
-                TEST_TYPE=sim
-                ;;
-    *|h|\?)     show_test_help
-                exit 0
-                ;;
+    h|\?)         show_test_help
+                  exit 0
+                  ;;
+    l|lock)       status "${start_test} Lock "
+                  test_command="sy2;q"
+                  log_filename+="lock${log_ext}"
+                  success_word="done"
+                  ;;
+    cv|convar)    status "${start_test} Conditional Variable "
+                  test_command="sy3;q"
+                  log_filename+="cond-var${log_ext}"
+                  success_word="done"
+                  ;;
+    t|traffic)    status "${start_test} A1 Traffic 4 15 0 1 0 "
+                  test_command="sp3 4 15 0 1 0;q"
+                  log_filename+="traffic${log_ext}"
+                  success_word="Simulation"
+                  ;;
+    2aa|onefork)  status "${start_test} uw-testbin/onefork "
+                  test_command="${pre_command} p uw-testbin/onefork;q"
+                  log_filename+="a2a-onefork${log_ext}"
+                  success_word="took"
+                  ;;
+    2ab|pidcheck) status "${start_test} uw-testbin/pidcheck "
+                  test_command="${pre_command} p uw-testbin/pidcheck;q"
+                  log_filename+="a2a-pidcheck${log_ext}"
+                  success_word="took"
+                  ;;
+    2ac|widefork) status "${start_test} uw-testbin/widefork "
+                  test_command="${pre_command} p uw-testbin/widefork;q"
+                  log_filename+="a2a-widefork${log_ext}"
+                  success_word="took"
+                  ;;
+    2ad|forktest) status "${start_test} testbin/forktest "
+                  test_command="${pre_command} p testbin/forktest;q"
+                  log_filename+="a2a-forktest${log_ext}"
+                  success_word="took"
+                  ;;
+    *)            show_test_help
+                  status "${start_test} ${TEST} "
+                  test_command="${pre_command} ${TEST};q"
+                  log_filename+="a2a-${TEST}${log_ext}"
+                  success_word="took"
+                  ;;
   esac
 
   if [[ "$LOOP" != false ]]; then
-    mkdir -p $cs350dir/log
-    logfile=$cs350dir/log/$log_filename
-    echo -n "1"
-    denom=$((LOOP / 75 + 1))
-    chunk_char="."
-    chunk_size=$((75 / LOOP - 1))
-    chunk=$chunk_char
-    for i in $(seq 1 $chunk_size); do chunk+=$chunk_char; done
-    for i in $(seq 1 $LOOP)
-    do
-      [ $denom -eq 0 ] && echo -n $chunk
-      [ $denom -ne 0 ] && [ $((i%denom)) -eq 0 ] && echo -n $chunk
-      status "${i} of ${LOOP}" >> $logfile
-      sys161 kernel-$ASSIGNMENT "${test_command}" &>> $logfile
-      echo "" >> $logfile
-    done
-    echo $i
-    if [[ "$TEST_TYPE" == "sim" ]]; then
-      success=$(grep -o "Simulation" ${logfile} | wc -w)
-    else
-      success=$(grep -o "done" ${logfile} | wc -w)
-    fi
+    run_loop
   else
-    sys161 kernel-$ASSIGNMENT "${test_command}"
+    run_only "${test_command}"
     i=1
     success=1
   fi
-  status "Test :: Finished ${success} / $i"
+
+  status "Test :: Fin ${success} / $i"
+}
+
+
+
+status "os161 :: ${ASSIGNMENT}"
+
+while getopts "h?:bcdmrwl:t:" opt; do
+  OPTIONS=true
+    case "$opt" in
+    h|\?)
+        show_help
+        exit 0
+        ;;
+    b)  echo "Option Registered: build"
+        run_build
+        ;;
+    c)  echo "Option Registered: continuous build"
+        run_continuous_build
+        ;;
+    d)  echo "Option Registered: run with debug output"
+        DEBUG=true
+        ;;
+    m)  echo "Option Registered: run with gdb tmux"
+        run_tmux
+        ;;
+    r)  echo "Option Registered: run"
+        run_only ""
+        ;;
+    l)  LOOP=$OPTARG
+        echo "Option Registered: loop following test ${LOOP} times"
+        ;;
+    t)  TEST=$OPTARG
+        echo "Option Registered: test ${TEST}"
+        run_test
+        TEST=false
+        ;;
+    w)  touch $cs350dir/log/tmp.log; rm $cs350dir/log/*.log
+        echo "Option Registered: wipe logs"
+        status "Logs Cleared"
+        exit 0
+        ;;
+    esac
+done
+
+if [[ "$OPTIONS" == false ]]; then
+  run_build
+  run_tmux
 fi
 
 exit 0
