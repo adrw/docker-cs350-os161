@@ -26,6 +26,29 @@ Getting Started
 - It will compile os161 and then run within Tmux with gdb side by side for easy debugging
 - Tmux will boot with `c` already typed into gdb (right). Press enter to `continue` os161 boot in left pane
 
+build-and-run.sh options
+---
+- default: builds from source, runs side by side with GDB in Tmux
+- `-b   ` - only build, don't run after
+- `-c   ` - continuous build loop
+- `-d   ` - set debug mode to output debug text
+- `-m   ` - only run, with gdb tmux panels
+- `-r   ` - only run, don't build, don't run with gdb
+- `-t {}` - run test {test alias}
+- `-l {}` - loop all following tests {#} times and log result in logs/ directory
+- `-w   ` - clear all logs
+
+Built in test aliases
+---
+- **Usage** `./build-and-run.sh -l {# of loops} -t {test name | code} -t {...`
+- `lock     | l`   - test locks with sy2
+- `convar   | cv`  - test conditional variables with sy3
+- `traffic  | t`   - A1 test for traffic simulation with 4 15 0 1 0 params
+- `onefork  | 2aa` - uw-testbin/onefork
+- `pidcheck | 2ab` - uw-testbin/pidcheck
+- `widefork | 2ac` - uw-testbin/widefork
+- `forktest | 2ad` - testbin/forktest
+
 Just the Docker Image
 ---
 - Already have Docker installed and want just an os161 image?
