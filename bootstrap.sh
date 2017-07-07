@@ -1,3 +1,4 @@
+# By Andrew Paradi | Source at https://github.com/andrewparadi/docker-cs350-os161
 #!/bin/bash
 
 mainDir=cs350-work

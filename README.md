@@ -41,13 +41,18 @@ build-and-run.sh options
 Built in test aliases
 ---
 - **Usage** `./build-and-run.sh -l {# of loops} -t {test name | code} -t {...`
-- `lock     | l`   - test locks with sy2
-- `convar   | cv`  - test conditional variables with sy3
-- `traffic  | t`   - A1 test for traffic simulation with 4 15 0 1 0 params
-- `onefork  | 2aa` - uw-testbin/onefork
-- `pidcheck | 2ab` - uw-testbin/pidcheck
-- `widefork | 2ac` - uw-testbin/widefork
-- `forktest | 2ad` - testbin/forktest
+- `lock         |  l`   - test locks with sy2
+- `convar       |  cv`  - test conditional variables with sy3
+- `traffic      |  t`   - A1 test for traffic simulation with 4 15 0 1 0 params
+- `onefork      |  2aa` - uw-testbin/onefork
+- `pidcheck     |  2ab` - uw-testbin/pidcheck
+- `widefork     |  2ac` - uw-testbin/widefork
+- `forktest     |  2ad` - testbin/forktest
+- `hogparty     |  2ba` - uw-testbin/hogparty
+- `sty          |  2bb` - testbin/sty
+- `argtest      |  2bc` - uw-testbin/argtest
+- `argtesttest  |  2bd` - uw-testbin/argtesttest
+- `add          |  2be` - testbin/add
 
 Just the Docker Image
 ---

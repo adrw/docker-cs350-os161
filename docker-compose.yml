@@ -1,3 +1,5 @@
+# By Andrew Paradi | Source at https://github.com/andrewparadi/docker-cs350-os161
+
 version: '2'
 services:
 

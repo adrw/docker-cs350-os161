@@ -1,3 +1,4 @@
+# By Andrew Paradi | Source at https://github.com/andrewparadi/docker-cs350-os161
 FROM debian:7
 MAINTAINER Andrew Paradi <me@andrewparadi.com>
 # sets up a Docker image according to the instructions on https://www.student.cs.uwaterloo.ca/~build/common/Install161NonCS.html

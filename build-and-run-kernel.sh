@@ -1,3 +1,4 @@
+# By Andrew Paradi | Source at https://github.com/andrewparadi/docker-cs350-os161
 #!/usr/bin/env bash
 
 # runs OS/161 in SYS/161 and attaches GDB, side by side in a tmux window
@@ -38,13 +39,21 @@ function show_help {
 function show_test_help {
   status "Help :: Test Aliases"
   echo "./build-and-run.sh -l {# of loops} -t {test name | code} -t {..."
+  status "A1"
   echo "lock        l   { test locks with sy2 }"
   echo "convar      cv  { test conditional variables with sy3 }"
   echo "traffic     t   { A1 test for traffic simulation with 4 15 0 1 0 params }"
+  status "A2a"
   echo "onefork     2aa { uw-testbin/onefork }"
   echo "pidcheck    2ab { uw-testbin/pidcheck }"
   echo "widefork    2ac { uw-testbin/widefork }"
   echo "forktest    2ad { testbin/forktest }"
+  status "A2b"
+  echo "hogparty    2ba { uw-testbin/hogparty }"
+  echo "sty         2bb { testbin/sty }"
+  echo "argtest     2bc { uw-testbin/argtest }"
+  echo "argtesttest 2bd { uw-testbin/argtesttest }"
+  echo "add         2be { testbin/add }"
   echo ""
 }
 
@@ -62,6 +71,8 @@ function run_build {
   # copy in the SYS/161 default configuration
   mkdir --parents $cs350dir/root
   cp --update $sys161dir/share/examples/sys161/sys161.conf.sample $cs350dir/root/sys161.conf
+  # overwrite with our own configuration if it is there
+  cp $cs350dir/os161-1.99/sys161.conf $cs350dir/root/sys161.conf
 
   # build kernel
   cd $cs350dir/os161-1.99
@@ -107,7 +118,7 @@ function run_tmux {
 
 function run_only {
   cd $cs350dir/root
-  sys161 kernel-$ASSIGNMENT "$1"
+  sys161 kernel-$ASSIGNMENT "${*}"
 }
 
 function run_loop {
@@ -125,7 +136,7 @@ function run_loop {
     [ $denom -eq 0 ] && echo -n $chunk
     [ $denom -ne 0 ] && [ $((i%denom)) -eq 0 ] && echo -n $chunk
     status "${i} of ${LOOP}" >> $logfile
-    sys161 kernel-$ASSIGNMENT "${test_command}" &>> $logfile
+    sys161 kernel-$ASSIGNMENT "${pre_command} ${test_command}" &>> $logfile
     echo "" >> $logfile
   done
   echo $i
@@ -139,9 +150,6 @@ function run_test {
   start_test="Test ::"
   test_command=""
   pre_command=""
-  if [[ "$DEBUG" == true ]]; then
-    pre_command="dl 8192; "
-  fi
 
   cd $cs350dir/root
 
@@ -168,23 +176,64 @@ function run_test {
                   test_command="${pre_command} p uw-testbin/onefork;q"
                   log_filename+="a2a-onefork${log_ext}"
                   success_word="took"
+                  pre_command="dl 8192; "
                   ;;
     2ab|pidcheck) status "${start_test} uw-testbin/pidcheck "
                   test_command="${pre_command} p uw-testbin/pidcheck;q"
                   log_filename+="a2a-pidcheck${log_ext}"
                   success_word="took"
+                  pre_command="dl 8192; "
                   ;;
     2ac|widefork) status "${start_test} uw-testbin/widefork "
                   test_command="${pre_command} p uw-testbin/widefork;q"
                   log_filename+="a2a-widefork${log_ext}"
                   success_word="took"
+                  pre_command="dl 8192; "
                   ;;
     2ad|forktest) status "${start_test} testbin/forktest "
                   test_command="${pre_command} p testbin/forktest;q"
                   log_filename+="a2a-forktest${log_ext}"
                   success_word="took"
+                  pre_command="dl 8192; "
+                  ;;
+    2ba|hogparty) status "${start_test} uw-testbin/hogparty "
+                  test_command="${pre_command} p uw-testbin/hogparty;q"
+                  log_filename+="a2b-hogparty${log_ext}"
+                  success_word="zzz"
+                  pre_command="dl 16384; "
+                  ;;
+    2bb|sty)      status "${start_test} testbin/sty "
+                  test_command="${pre_command} p testbin/sty;q"
+                  log_filename+="a2b-sty${log_ext}"
+                  success_word="succeeded"
+                  pre_command="dl 16384; "
+                  ;;
+    2bc|argtest)  status "${start_test} p uw-testbin/argtest first second third "
+                  test_command="${pre_command} p uw-testbin/argtest first second third;q"
+                  log_filename+="a2b-argtest${log_ext}"
+                  success_word="\[NULL\]"
+                  pre_command="dl 16384; "
+                  ;;
+    2bd|argtesttest)
+                  status "${start_test} uw-testbin/argtesttest "
+                  test_command="${pre_command} p uw-testbin/argtesttest;q"
+                  log_filename+="a2b-argtesttest${log_ext}"
+                  success_word="\[NULL\]"
+                  pre_command="dl 16384; "
+                  ;;
+    2be|add)      status "${start_test} testbin/add 2 4"
+                  test_command="${pre_command} p testbin/add 2 4;q"
+                  log_filename+="a2b-add${log_ext}"
+                  success_word="Answer:"
+                  pre_command="dl 16384; "
                   ;;
     *)            show_test_help
+                  read -p "Run test ${TEST}? [y/n/enter]" -n 1 -r
+                  echo    # (optional) move to a new line
+                  if [[ $REPLY =~ ^[Nn]$ ]]
+                  then
+                    exit 0
+                  fi
                   status "${start_test} ${TEST} "
                   test_command="${pre_command} ${TEST};q"
                   log_filename+="a2a-${TEST}${log_ext}"
@@ -192,10 +241,14 @@ function run_test {
                   ;;
   esac
 
+  if [[ "$DEBUG" == false ]]; then
+    pre_command=""
+  fi
+
   if [[ "$LOOP" != false ]]; then
     run_loop
   else
-    run_only "${test_command}"
+    run_only "${pre_command} ${test_command}"
     i=1
     success=1
   fi
