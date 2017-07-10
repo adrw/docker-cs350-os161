@@ -29,10 +29,10 @@ if [[ ! -x ./$srcDir ]]; then
   cd $back
 fi
 
-if [[ ! -f ./$srcDir/build-and-run-kernel.sh ]]; then
+if [[ ! -f ./$srcDir/build-test.sh ]]; then
   # get useful processing scripts
-  wget https://raw.githubusercontent.com/andrewparadi/docker-os161/master/build-and-run-kernel.sh -O ./$srcDir/build-and-run-kernel.sh
-  chmod +x ./$srcDir/build-and-run-kernel.sh
+  wget https://raw.githubusercontent.com/andrewparadi/docker-os161/master/build-test.sh -O ./$srcDir/build-test.sh
+  chmod +x ./$srcDir/build-test.sh
 fi
 
 if [[ ! -f ./$srcDir/submit.sh ]]; then

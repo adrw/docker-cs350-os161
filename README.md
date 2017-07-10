@@ -1,12 +1,10 @@
-os161 Environment for CS350 University of Waterloo
----
-
-Why this os161 image?
----
-- You're enrolled in CS350 Operating Systems at UW and want to code on your own machine
-- 16% smaller than other os161 images on Docker Hub (1.18GB vs 1.4GB installed, 406MB vs 454MB compressed)
-- Included helper files installed with `bootstrap.sh` make build and compile easy
-- Common `build-and-run-kernel.sh` script that works on both UW servers and in Docker container
+Build-Test Script and Docker Image for CS350
+===
+- You're taking CS350 Operating Systems at UW
+- You want to be able to build os161 on your own machine
+  - The Docker image here is 24% smaller than other os161 images on Docker Hub (1.12GB vs 1.4GB installed, 345MB vs 454MB compressed)
+- You want a build script that has awesome testing features (loops, logging, test aliases) included
+  - The `build-test.sh` script here works on both UW servers and with Docker on your own computer
 
 Install
 ---
@@ -15,32 +13,30 @@ Install
   ```bash
   $ curl -s https://raw.githubusercontent.com/andrewparadi/docker-os161/master/bootstrap.sh | bash -s
   ```
-- This will create the initial folder directory, initialize a clean install of os161, and download the `Makefile`
+- This will create folder structure, do clean install of os161, and download the `Makefile` and `build-test.sh`
 
 Getting Started
 ---
-- `cd` into the `cs350-work` directory where your `Makefile` was installed
-- Start Docker container with `make`
+- Within your os161 directory, start the Docker container with `make`
   - To build image from scratch, run `make build` or `make rebuild` (build without cached Docker images)
-- In Docker container, or in cs350-os161 directory on UW server, run `./build-and-run-kernel.sh`
-- It will compile os161 and then run within Tmux with gdb side by side for easy debugging
-- Tmux will boot with `c` already typed into gdb (right). Press enter to `continue` os161 boot in left pane
+- Start your version of os161 with `./build-test.sh` and any of the options below
 
-build-and-run.sh options
+build-test.sh Options
 ---
 - default: builds from source, runs side by side with GDB in Tmux
-- `-b   ` - only build, don't run after
+- `-b   ` - only build from source, don't run after
 - `-c   ` - continuous build loop
-- `-d   ` - set debug mode to output debug text
-- `-m   ` - only run, with gdb tmux panels
-- `-r   ` - only run, don't build, don't run with gdb
+- `-d   ` - output debug text when tests are run
+- `-m   ` - run with gdb tmux panels without rebuild
+- `-r   ` - run only (no gdb tmux or rebuild)
 - `-t {}` - run test {test alias}
-- `-l {}` - loop all following tests {#} times and log result in logs/ directory
+- `-l {}` - loop all following tests {#} times and log result in `logs/` directory
 - `-w   ` - clear all logs
 
-Built in test aliases
+Included Tests
 ---
-- **Usage** `./build-and-run.sh -l {# of loops} -t {test name | code} -t {...`
+- **Usage** `./build-and-run.sh -t {test name | test alias} -t {...`
+- **Usage (with loops)** `./build-and-run.sh -l {# of loops} -t {test name | test alias} -t {...`
 - `lock         |  l`   - test locks with sy2
 - `convar       |  cv`  - test conditional variables with sy3
 - `traffic      |  t`   - A1 test for traffic simulation with 4 15 0 1 0 params
@@ -65,4 +61,4 @@ Resources
 - [**Docker Hub andrewparadi/cs350-os161 Image**](https://hub.docker.com/r/andrewparadi/cs350-os161/)
 - [**Uberi/uw-cs350-development-environment**](https://github.com/Uberi/uw-cs350-development-environment)
 - [**University of Waterloo CS350 Operating Systems Course Site**](https://www.student.cs.uwaterloo.ca/~cs350/)
-- [**Source Code**](https://github.com/andrewparadi/docker-os161)
+- [**Source Code on GitHub**](https://github.com/andrewparadi/docker-os161)
