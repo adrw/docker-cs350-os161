@@ -10,7 +10,7 @@ set -o pipefail # for a pipeline, if any of the commands fail with a non-zero ex
 
 cs350dir="/root/cs350-os161"
 sys161dir="/root/sys161"
-ASSIGNMENT=ASST2
+ASSIGNMENT=ASST3
 TEST=false
 LOOP=false
 OPTIONS=false
@@ -54,6 +54,19 @@ function show_test_help {
   echo "argtest     2bc { uw-testbin/argtest }"
   echo "argtesttest 2bd { uw-testbin/argtesttest }"
   echo "add         2be { testbin/add }"
+  echo ""
+  status "A3"
+  echo "vm-data1    3a  { uw-testbin/vm-data1 }"
+  echo "vm-data3    3b  { uw-testbin/vm-data3 }"
+  echo "romemwrite  3c  { uw-testbin/romemwrite }"
+  echo "vm-crash2   3d  { uw-testbin/vm-crash2 }"
+  echo "vm-data1    3e  { uw-testbin/vm-data1 }"
+  echo "lvm-data1   3el { loop 5 x uw-testbin/vm-data1 }"
+  echo "sort        3f  { testbin/sort }"
+  echo "lsort       3fl { loop 5 x testbin/sort }"
+  echo "lmatmult    3gl { loop 5 x testbin/matmult }"
+  echo "lwidefork   3h  { uw-testbin/widefork  }"
+  echo "lhogparty   3i  { loop 5 x uw-testbin/hogparty }"
   echo ""
 }
 
@@ -227,6 +240,82 @@ function run_test {
                   success_word="Answer:"
                   pre_command="dl 16384; "
                   ;;
+    3a|vm-data1)  status "${start_test} uw-testbin/vm-data1"
+                  test_command="${pre_command} p uw-testbin/vm-data1;q"
+                  log_filename+="a3a-vm-data1${log_ext}"
+                  success_word="took"
+                  pre_command="dl 32768; "
+                  # pre_command="dl 32800; "
+                  ;;
+    3b|vm-data3)  status "${start_test} uw-testbin/vm-data3"
+                  test_command="${pre_command} p uw-testbin/vm-data3;q"
+                  log_filename+="a3b-vm-data3${log_ext}"
+                  success_word="took"
+                  pre_command="dl 32768; "
+                  ;;
+    3c|romemwrite)
+                  status "${start_test} uw-testbin/romemwrite"
+                  test_command="${pre_command} p uw-testbin/romemwrite;q"
+                  log_filename+="a3c-romemwrite${log_ext}"
+                  success_word="took"
+                  pre_command="dl 32768; "
+                  ;;
+    3d|vm-crash2) status "${start_test} uw-testbin/vm-crash2"
+                  test_command="${pre_command} p uw-testbin/vm-crash2;q"
+                  log_filename+="a3d-vm-crash2${log_ext}"
+                  success_word="took"
+                  pre_command="dl 32768; "
+                  ;;
+    3e|vm-data1)  status "${start_test} uw-testbin/vm-data1"
+                  test_command="${pre_command} p uw-testbin/vm-data1;q"
+                  log_filename+="a3e-vm-data1${log_ext}"
+                  success_word="took"
+                  pre_command="dl 32768; "
+                  ;;
+    3el|lvm-data1)
+                  status "${start_test} loop 5 x uw-testbin/vm-data1"
+                  test_command="${pre_command} p uw-testbin/vm-data1; p uw-testbin/vm-data1; p uw-testbin/vm-data1; p uw-testbin/vm-data1; p uw-testbin/vm-data1;q"
+                  log_filename+="a3el-lvm-data1${log_ext}"
+                  success_word="took"
+                  pre_command="dl 32768; "
+                  ;;
+    3f|sort)      status "${start_test} testbin/sort"
+                  test_command="${pre_command} p testbin/sort;q"
+                  log_filename+="a3f-sort${log_ext}"
+                  success_word="took"
+                  pre_command="dl 32768; "
+                  ;;
+    3fl|lsort)    status "${start_test} loop 5 x testbin/sort"
+                  test_command="${pre_command} p testbin/sort; p testbin/sort; p testbin/sort; p testbin/sort; p testbin/sort;q"
+                  log_filename+="a3fl-lsort${log_ext}"
+                  success_word="took"
+                  pre_command="dl 32768; "
+                  ;;
+    3g|matmult)   status "${start_test} testbin/matmult"
+                  test_command="${pre_command} p testbin/matmult;q"
+                  log_filename+="a3g-matmult${log_ext}"
+                  success_word="took"
+                  pre_command="dl 32768; "
+                  ;;
+    3gl|lmatmult) status "${start_test} loop 5 x testbin/matmult"
+                  test_command="${pre_command} p testbin/matmult; p testbin/matmult; p testbin/matmult; p testbin/matmult; p testbin/matmult; q"
+                  log_filename+="a3gl-lmatmult${log_ext}"
+                  success_word="took"
+                  pre_command="dl 32768; "
+                  ;;
+    3h|lwidefork) status "${start_test} uw-testbin/widefork "
+                  test_command="${pre_command} p uw-testbin/widefork; p uw-testbin/widefork; p uw-testbin/widefork; p uw-testbin/widefork; p uw-testbin/widefork; q"
+                  log_filename+="a3h-widefork${log_ext}"
+                  success_word="took"
+                  pre_command="dl 8192; "
+                  ;;
+    3i|lhogparty)
+                  status "${start_test} loop 5 x uw-testbin/hogparty"
+                  test_command="${pre_command} p uw-testbin/hogparty; p uw-testbin/hogparty; p uw-testbin/hogparty; p uw-testbin/hogparty; p uw-testbin/hogparty; q"
+                  log_filename+="a3i-hogparty${log_ext}"
+                  success_word="zzz"
+                  pre_command="dl 16384; "
+                  ;;
     *)            show_test_help
                   read -p "Run test ${TEST}? [y/n/enter]" -n 1 -r
                   echo    # (optional) move to a new line
@@ -235,8 +324,8 @@ function run_test {
                     exit 0
                   fi
                   status "${start_test} ${TEST} "
-                  test_command="${pre_command} ${TEST};q"
-                  log_filename+="a2a-${TEST}${log_ext}"
+                  test_command="${TEST};q"
+                  log_filename+="${TEST}${log_ext}"
                   success_word="took"
                   ;;
   esac
@@ -255,8 +344,6 @@ function run_test {
 
   status "Test :: Fin ${success} / $i"
 }
-
-
 
 status "os161 :: ${ASSIGNMENT}"
 
