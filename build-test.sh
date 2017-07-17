@@ -16,14 +16,30 @@ LOOP=false
 OPTIONS=false
 DEBUG=false
 
-div="***************************************************************************"
+# div="***************************************************************************"
+# function status {
+#   echo ""
+#   echo "[ ${1} ] ${div:${#1}}"
+# }
+
 function status {
-  echo ""
-  echo "[ ${1} ] ${div:${#1}}"
+  Reset='   tput sgr0'       # Text Reset
+  Red='     tput setaf 1'          # Red
+  Green='   tput setaf 2'        # Green
+  Blue='    tput setaf 4'         # Blue
+  div="********************************************************************************"
+  scriptname="$(basename "$0")"
+  case "$1" in
+    a)        echo "" && echo "$($Blue)<|${scriptname:0:1}$($Reset) [ ${2} ] ${div:$((${#2}+9))}" ;;
+    b)        echo "$($Green)ok: [ ${2} ] ${div:$((${#2}+9))}$($Reset)" ;;
+    s|status) echo "$($Blue)<|${scriptname:0:1}$($Reset) [ ${2} ] ${div:$((${#2}+9))}" ;;
+    t|title)  echo "$($Blue)<|${scriptname}$($Reset) [ ${2} ] ${div:$((${#2}+8+${#scriptname}))}" ;;
+    e|err)    echo "$($Red)fatal: [ ${2} ] ${div:$((${#2}+12))}$($Reset)" ;;
+  esac
 }
 
 function show_help {
-  status "Help :: Build and Run Options"
+  status a "Help :: Build and Run Options"
   echo "{ }       { default: builds from source, runs with gdb in Tmux }"
   echo "-b        { only build, don't run after }"
   echo "-c        { continuous build loop }"
@@ -39,23 +55,23 @@ function show_help {
 function show_test_help {
   status "Help :: Test Aliases"
   echo "./build-and-run.sh -l {# of loops} -t {test name | code} -t {..."
-  status "A1"
+  status a "A1"
   echo "lock        l   { test locks with sy2 }"
   echo "convar      cv  { test conditional variables with sy3 }"
   echo "traffic     t   { A1 test for traffic simulation with 4 15 0 1 0 params }"
-  status "A2a"
+  status a "A2a"
   echo "onefork     2aa { uw-testbin/onefork }"
   echo "pidcheck    2ab { uw-testbin/pidcheck }"
   echo "widefork    2ac { uw-testbin/widefork }"
   echo "forktest    2ad { testbin/forktest }"
-  status "A2b"
+  status a "A2b"
   echo "hogparty    2ba { uw-testbin/hogparty }"
   echo "sty         2bb { testbin/sty }"
   echo "argtest     2bc { uw-testbin/argtest }"
   echo "argtesttest 2bd { uw-testbin/argtesttest }"
   echo "add         2be { testbin/add }"
   echo ""
-  status "A3"
+  status a "A3"
   echo "vm-data1    3a  { uw-testbin/vm-data1 }"
   echo "vm-data3    3b  { uw-testbin/vm-data3 }"
   echo "romemwrite  3c  { uw-testbin/romemwrite }"
@@ -75,7 +91,7 @@ if ! grep docker /proc/1/cgroup -qa; then
   cs350dir="$HOME/cs350-os161"
   sys161dir="/u/cs350/sys161"
   if [[ ! $HOME == /u* ]]; then
-    status 'ERROR :: PLEASE RUN THIS SCRIPT ON UW ENVIRONMENT OR DOCKER CONTAINER'
+    status err 'ERROR :: PLEASE RUN THIS SCRIPT ON UW ENVIRONMENT OR DOCKER CONTAINER'
     exit 1
   fi
 fi
@@ -148,12 +164,13 @@ function run_loop {
   do
     [ $denom -eq 0 ] && echo -n $chunk
     [ $denom -ne 0 ] && [ $((i%denom)) -eq 0 ] && echo -n $chunk
-    status "${i} of ${LOOP}" >> $logfile
+    status l "${i} of ${LOOP}" >> $logfile
     sys161 kernel-$ASSIGNMENT "${pre_command} ${test_command}" &>> $logfile
     echo "" >> $logfile
   done
   echo $i
   success=$(grep -o "${success_word}" ${logfile} | wc -w)
+  # success=$(grep -o "${success_word}" ${logfile} | wc -w)
 }
 
 function run_test {
@@ -170,147 +187,147 @@ function run_test {
     h|\?)         show_test_help
                   exit 0
                   ;;
-    l|lock)       status "${start_test} Lock "
+    l|lock)       status a "${start_test} Lock "
                   test_command="sy2;q"
                   log_filename+="lock${log_ext}"
                   success_word="done"
                   ;;
-    cv|convar)    status "${start_test} Conditional Variable "
+    cv|convar)    status a "${start_test} Conditional Variable "
                   test_command="sy3;q"
                   log_filename+="cond-var${log_ext}"
                   success_word="done"
                   ;;
-    t|traffic)    status "${start_test} A1 Traffic 4 15 0 1 0 "
+    t|traffic)    status a "${start_test} A1 Traffic 4 15 0 1 0 "
                   test_command="sp3 4 15 0 1 0;q"
                   log_filename+="traffic${log_ext}"
                   success_word="Simulation"
                   ;;
-    2aa|onefork)  status "${start_test} uw-testbin/onefork "
+    2aa|onefork)  status a "${start_test} uw-testbin/onefork "
                   test_command="${pre_command} p uw-testbin/onefork;q"
                   log_filename+="a2a-onefork${log_ext}"
                   success_word="took"
                   pre_command="dl 8192; "
                   ;;
-    2ab|pidcheck) status "${start_test} uw-testbin/pidcheck "
+    2ab|pidcheck) status a "${start_test} uw-testbin/pidcheck "
                   test_command="${pre_command} p uw-testbin/pidcheck;q"
                   log_filename+="a2a-pidcheck${log_ext}"
                   success_word="took"
                   pre_command="dl 8192; "
                   ;;
-    2ac|widefork) status "${start_test} uw-testbin/widefork "
+    2ac|widefork) status a "${start_test} uw-testbin/widefork "
                   test_command="${pre_command} p uw-testbin/widefork;q"
                   log_filename+="a2a-widefork${log_ext}"
                   success_word="took"
                   pre_command="dl 8192; "
                   ;;
-    2ad|forktest) status "${start_test} testbin/forktest "
+    2ad|forktest) status a "${start_test} testbin/forktest "
                   test_command="${pre_command} p testbin/forktest;q"
                   log_filename+="a2a-forktest${log_ext}"
                   success_word="took"
                   pre_command="dl 8192; "
                   ;;
-    2ba|hogparty) status "${start_test} uw-testbin/hogparty "
+    2ba|hogparty) status a "${start_test} uw-testbin/hogparty "
                   test_command="${pre_command} p uw-testbin/hogparty;q"
                   log_filename+="a2b-hogparty${log_ext}"
                   success_word="zzz"
                   pre_command="dl 16384; "
                   ;;
-    2bb|sty)      status "${start_test} testbin/sty "
+    2bb|sty)      status a "${start_test} testbin/sty "
                   test_command="${pre_command} p testbin/sty;q"
                   log_filename+="a2b-sty${log_ext}"
                   success_word="succeeded"
                   pre_command="dl 16384; "
                   ;;
-    2bc|argtest)  status "${start_test} p uw-testbin/argtest first second third "
+    2bc|argtest)  status a "${start_test} p uw-testbin/argtest first second third "
                   test_command="${pre_command} p uw-testbin/argtest first second third;q"
                   log_filename+="a2b-argtest${log_ext}"
                   success_word="\[NULL\]"
                   pre_command="dl 16384; "
                   ;;
     2bd|argtesttest)
-                  status "${start_test} uw-testbin/argtesttest "
+                  status a "${start_test} uw-testbin/argtesttest "
                   test_command="${pre_command} p uw-testbin/argtesttest;q"
                   log_filename+="a2b-argtesttest${log_ext}"
                   success_word="\[NULL\]"
                   pre_command="dl 16384; "
                   ;;
-    2be|add)      status "${start_test} testbin/add 2 4"
+    2be|add)      status a "${start_test} testbin/add 2 4"
                   test_command="${pre_command} p testbin/add 2 4;q"
                   log_filename+="a2b-add${log_ext}"
                   success_word="Answer:"
                   pre_command="dl 16384; "
                   ;;
-    3a|vm-data1)  status "${start_test} uw-testbin/vm-data1"
+    3a|vm-data1)  status a "${start_test} uw-testbin/vm-data1"
                   test_command="${pre_command} p uw-testbin/vm-data1;q"
                   log_filename+="a3a-vm-data1${log_ext}"
                   success_word="took"
                   pre_command="dl 32768; "
                   # pre_command="dl 32800; "
                   ;;
-    3b|vm-data3)  status "${start_test} uw-testbin/vm-data3"
+    3b|vm-data3)  status a "${start_test} uw-testbin/vm-data3"
                   test_command="${pre_command} p uw-testbin/vm-data3;q"
                   log_filename+="a3b-vm-data3${log_ext}"
                   success_word="took"
                   pre_command="dl 32768; "
                   ;;
     3c|romemwrite)
-                  status "${start_test} uw-testbin/romemwrite"
+                  status a "${start_test} uw-testbin/romemwrite"
                   test_command="${pre_command} p uw-testbin/romemwrite;q"
                   log_filename+="a3c-romemwrite${log_ext}"
                   success_word="took"
                   pre_command="dl 32768; "
                   ;;
-    3d|vm-crash2) status "${start_test} uw-testbin/vm-crash2"
+    3d|vm-crash2) status a "${start_test} uw-testbin/vm-crash2"
                   test_command="${pre_command} p uw-testbin/vm-crash2;q"
                   log_filename+="a3d-vm-crash2${log_ext}"
                   success_word="took"
                   pre_command="dl 32768; "
                   ;;
-    3e|vm-data1)  status "${start_test} uw-testbin/vm-data1"
+    3e|vm-data1)  status a "${start_test} uw-testbin/vm-data1"
                   test_command="${pre_command} p uw-testbin/vm-data1;q"
                   log_filename+="a3e-vm-data1${log_ext}"
                   success_word="took"
                   pre_command="dl 32768; "
                   ;;
     3el|lvm-data1)
-                  status "${start_test} loop 5 x uw-testbin/vm-data1"
+                  status a "${start_test} loop 5 x uw-testbin/vm-data1"
                   test_command="${pre_command} p uw-testbin/vm-data1; p uw-testbin/vm-data1; p uw-testbin/vm-data1; p uw-testbin/vm-data1; p uw-testbin/vm-data1;q"
                   log_filename+="a3el-lvm-data1${log_ext}"
                   success_word="took"
                   pre_command="dl 32768; "
                   ;;
-    3f|sort)      status "${start_test} testbin/sort"
+    3f|sort)      status a "${start_test} testbin/sort"
                   test_command="${pre_command} p testbin/sort;q"
                   log_filename+="a3f-sort${log_ext}"
                   success_word="took"
                   pre_command="dl 32768; "
                   ;;
-    3fl|lsort)    status "${start_test} loop 5 x testbin/sort"
+    3fl|lsort)    status a "${start_test} loop 5 x testbin/sort"
                   test_command="${pre_command} p testbin/sort; p testbin/sort; p testbin/sort; p testbin/sort; p testbin/sort;q"
                   log_filename+="a3fl-lsort${log_ext}"
                   success_word="took"
                   pre_command="dl 32768; "
                   ;;
-    3g|matmult)   status "${start_test} testbin/matmult"
+    3g|matmult)   status a "${start_test} testbin/matmult"
                   test_command="${pre_command} p testbin/matmult;q"
                   log_filename+="a3g-matmult${log_ext}"
                   success_word="took"
                   pre_command="dl 32768; "
                   ;;
-    3gl|lmatmult) status "${start_test} loop 5 x testbin/matmult"
+    3gl|lmatmult) status a "${start_test} loop 5 x testbin/matmult"
                   test_command="${pre_command} p testbin/matmult; p testbin/matmult; p testbin/matmult; p testbin/matmult; p testbin/matmult; q"
                   log_filename+="a3gl-lmatmult${log_ext}"
                   success_word="took"
                   pre_command="dl 32768; "
                   ;;
-    3h|lwidefork) status "${start_test} uw-testbin/widefork "
+    3h|lwidefork) status a "${start_test} uw-testbin/widefork "
                   test_command="${pre_command} p uw-testbin/widefork; p uw-testbin/widefork; p uw-testbin/widefork; p uw-testbin/widefork; p uw-testbin/widefork; q"
                   log_filename+="a3h-widefork${log_ext}"
                   success_word="took"
                   pre_command="dl 8192; "
                   ;;
     3i|lhogparty)
-                  status "${start_test} loop 5 x uw-testbin/hogparty"
+                  status a "${start_test} loop 5 x uw-testbin/hogparty"
                   test_command="${pre_command} p uw-testbin/hogparty; p uw-testbin/hogparty; p uw-testbin/hogparty; p uw-testbin/hogparty; p uw-testbin/hogparty; q"
                   log_filename+="a3i-hogparty${log_ext}"
                   success_word="zzz"
@@ -323,7 +340,7 @@ function run_test {
                   then
                     exit 0
                   fi
-                  status "${start_test} ${TEST} "
+                  status a "${start_test} ${TEST} "
                   test_command="${TEST};q"
                   log_filename+="${TEST}${log_ext}"
                   success_word="took"
@@ -342,10 +359,16 @@ function run_test {
     success=1
   fi
 
-  status "Test :: Fin ${success} / $i"
+  if [[ "$success" == "$i" ]]; then
+    status b "Test :: Fin ${success} / $i"
+  else
+    status err "Test :: Fin ${success} / $i"
+  fi
 }
 
-status "os161 :: ${ASSIGNMENT}"
+status t "Welcome to os161 built-test.sh"
+status s "Andrew Paradi. https://github.com/andrewparadi/docker-cs350-os161"
+status b "os161 :: ${ASSIGNMENT}"
 
 while getopts "h?:bcdmrwl:t:" opt; do
   OPTIONS=true
@@ -379,7 +402,7 @@ while getopts "h?:bcdmrwl:t:" opt; do
         ;;
     w)  touch $cs350dir/log/tmp.log; rm $cs350dir/log/*.log
         echo "Option Registered: wipe logs"
-        status "Logs Cleared"
+        status b "Logs Cleared"
         exit 0
         ;;
     esac

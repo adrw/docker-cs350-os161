@@ -12,12 +12,12 @@ function status {
   Green='   tput setaf 2'        # Green
   Blue='    tput setaf 4'         # Blue
   div="********************************************************************************"
+  scriptname="$(basename "$0")"
   case "$1" in
-    a)        echo ""
-              echo "$($Blue)<|b$($Reset) [ ${2} ] ${div:$((${#2}+9))}" ;;
+    a)        echo "" && echo "$($Blue)<|${scriptname:0:1}$($Reset) [ ${2} ] ${div:$((${#2}+9))}" ;;
     b)        echo "$($Green)ok: [ ${2} ] ${div:$((${#2}+9))}$($Reset)" ;;
-    s|status) echo "$($Blue)<|b$($Reset) [ ${2} ] ${div:$((${#2}+9))}" ;;
-    t|title)  echo "$($Blue)<|bootstrap.sh$($Reset) [ ${2} ] ${div:$((${#2}+20))}" ;;
+    s|status) echo "$($Blue)<|${scriptname:0:1}$($Reset) [ ${2} ] ${div:$((${#2}+9))}" ;;
+    t|title)  echo "$($Blue)<|${scriptname}$($Reset) [ ${2} ] ${div:$((${#2}+8+${#scriptname}))}" ;;
     e|err)    echo "$($Red)fatal: [ ${2} ] ${div:$((${#2}+12))}$($Reset)" ;;
   esac
 }
