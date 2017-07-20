@@ -16,12 +16,6 @@ LOOP=false
 OPTIONS=false
 DEBUG=false
 
-# div="***************************************************************************"
-# function status {
-#   echo ""
-#   echo "[ ${1} ] ${div:${#1}}"
-# }
-
 function status {
   Reset='   tput sgr0'       # Text Reset
   Red='     tput setaf 1'          # Red
@@ -80,8 +74,9 @@ function show_test_help {
   echo "lvm-data1   3el { loop 5 x uw-testbin/vm-data1 }"
   echo "sort        3f  { testbin/sort }"
   echo "lsort       3fl { loop 5 x testbin/sort }"
+  echo "matmult     3g  { testbin/matmult }"
   echo "lmatmult    3gl { loop 5 x testbin/matmult }"
-  echo "lwidefork   3h  { uw-testbin/widefork  }"
+  echo "lwidefork   3h  { loop 5 x uw-testbin/widefork  }"
   echo "lhogparty   3i  { loop 5 x uw-testbin/hogparty }"
   echo ""
 }
