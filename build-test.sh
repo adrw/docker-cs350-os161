@@ -48,7 +48,7 @@ function show_help {
 
 function show_test_help {
   status "Help :: Test Aliases"
-  echo "./build-and-run.sh -l {# of loops} -t {test name | code} -t {..."
+  echo "./build-test.sh -l {# of loops} -t {test name | code} -t {..."
   status a "A1"
   echo "lock        l   { test locks with sy2 }"
   echo "convar      cv  { test conditional variables with sy3 }"
@@ -74,7 +74,7 @@ function show_test_help {
   echo "lvm-data1   3el { loop 5 x uw-testbin/vm-data1 }"
   echo "sort        3f  { testbin/sort }"
   echo "lsort       3fl { loop 5 x testbin/sort }"
-  echo "matmult     3g  { testbin/matmult }"
+  echo "lmatmult    3g  { testbin/matmult }"
   echo "lmatmult    3gl { loop 5 x testbin/matmult }"
   echo "lwidefork   3h  { loop 5 x uw-testbin/widefork  }"
   echo "lhogparty   3i  { loop 5 x uw-testbin/hogparty }"

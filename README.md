@@ -1,10 +1,9 @@
 Build-Test Script and Docker Image for CS350
 ===
-- You're taking CS350 Operating Systems at UW
-- You want to be able to build os161 on your own machine
-  - The Docker image here is 24% smaller than other os161 images on Docker Hub (1.12GB vs 1.4GB installed, 345MB vs 454MB compressed)
-- You want a build script that has awesome testing features (loops, logging, test aliases) included
-  - The `build-test.sh` script here works on both UW servers and with Docker on your own computer
+- Docker image: Minimalistic docker image with sys161 and os161 build tools, 24% smaller than other os161 images
+- build-test.sh: os161 compile routines with options for looped tests and Tmux split screen GDB debugging
+- Built while taking the CS350 Operating Systems course at University of Waterloo
+- Not under active development as of Aug 9, 2017
 
 Install
 ---
@@ -17,9 +16,9 @@ Install
 
 Getting Started
 ---
-- Within your os161 directory, start the Docker container with `make`
+- If on your own computer within your os161 directory, start the Docker container with `make`
   - To build image from scratch, run `make build` or `make rebuild` (build without cached Docker images)
-- Start your version of os161 with `./build-test.sh` and any of the options below
+- Compile and run os161 with `./build-test.sh` and any of the options below
 
 build-test.sh Options
 ---
@@ -33,22 +32,38 @@ build-test.sh Options
 - `-l {}` - loop all following tests {#} times and log result in `logs/` directory
 - `-w   ` - clear all logs
 
-Included Tests
+Included Tests | Test Aliases
 ---
-- **Usage** `./build-and-run.sh -t {test name | test alias} -t {...`
-- **Usage (with loops)** `./build-and-run.sh -l {# of loops} -t {test name | test alias} -t {...`
-- `lock         |  l`   - test locks with sy2
-- `convar       |  cv`  - test conditional variables with sy3
-- `traffic      |  t`   - A1 test for traffic simulation with 4 15 0 1 0 params
-- `onefork      |  2aa` - uw-testbin/onefork
-- `pidcheck     |  2ab` - uw-testbin/pidcheck
-- `widefork     |  2ac` - uw-testbin/widefork
-- `forktest     |  2ad` - testbin/forktest
-- `hogparty     |  2ba` - uw-testbin/hogparty
-- `sty          |  2bb` - testbin/sty
-- `argtest      |  2bc` - uw-testbin/argtest
-- `argtesttest  |  2bd` - uw-testbin/argtesttest
-- `add          |  2be` - testbin/add
+- **Usage** `./build-test.sh -t {test name | test alias} -t {...`
+- **Usage (with loops)** `./build-test.sh -l {# of loops} -t {test name | test alias} -t {...`
+- **A1**
+  - `l   |  lock       `   - test locks with sy2
+  - `cv  |  convar     `  - test conditional variables with sy3
+  - `t   |  traffic    `   - A1 test for traffic simulation with 4 15 0 1 0 params
+- **A2A**
+  - `2aa |  onefork    ` - uw-testbin/onefork
+  - `2ab |  pidcheck   ` - uw-testbin/pidcheck
+  - `2ac |  widefork   ` - uw-testbin/widefork
+  - `2ad |  forktest   ` - testbin/forktest
+- **A2B**
+  - `2ba |  hogparty   ` - uw-testbin/hogparty
+  - `2bb |  sty        ` - testbin/sty
+  - `2bc |  argtest    ` - uw-testbin/argtest
+  - `2bd |  argtesttest` - uw-testbin/argtesttest
+  - `2be |  add        ` - testbin/add
+- **A3**
+  - `3a  |  vm-data1   `  - uw-testbin/vm-data1
+  - `3b  |  vm-data3   `  - uw-testbin/vm-data3
+  - `3c  |  romemwrite `  - uw-testbin/romemwrite
+  - `3d  |  vm-crash2  `  - uw-testbin/vm-crash2
+  - `3e  |  vm-data1   `  - uw-testbin/vm-data1
+  - `3el |  lvm-data1  ` - loop 5 x uw-testbin/vm-data1
+  - `3f  |  sort       `  - testbin/sort
+  - `3fl |  lsort      ` - loop 5 x testbin/sort
+  - `3g  |  lmatmult   `  - testbin/matmult
+  - `3gl |  lmatmult   ` - loop 5 x testbin/matmult
+  - `3h  |  lwidefork  `  - loop 5 x uw-testbin/widefork
+  - `3i  |  lhogparty  `  - loop 5 x uw-testbin/hogparty
 
 Just the Docker Image
 ---
