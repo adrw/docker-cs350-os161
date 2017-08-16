@@ -74,14 +74,14 @@ if [[ ! -x ./$srcDir ]]; then
   status b "Download os161 source code"
 fi
 
-safe_download ./$srcDir/build-test.sh https://raw.githubusercontent.com/andrewparadi/docker-os161/master/build-test.sh
+safe_download ./$srcDir/build-test.sh https://raw.githubusercontent.com/andrewparadi/docker-cs350-os161/master/build-test.sh
 chmod +x ./$srcDir/build-test.sh
 
-safe_download ./$srcDir/submit.sh https://raw.githubusercontent.com/andrewparadi/docker-os161/master/submit.sh
+safe_download ./$srcDir/submit.sh https://raw.githubusercontent.com/andrewparadi/docker-cs350-os161/master/submit.sh
 chmod +x ./$srcDir/submit.sh
 
 if [[ "$HOME" != /u* ]]; then
-  safe_download ./$mainDir/Makefile https://raw.githubusercontent.com/andrewparadi/docker-os161/master/Makefile
+  safe_download ./$mainDir/Makefile https://raw.githubusercontent.com/andrewparadi/docker-cs350-os161/master/Makefile
 
   # get the prebuilt Docker image
   docker pull andrewparadi/cs350-os161:latest
