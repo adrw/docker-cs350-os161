@@ -4,6 +4,7 @@ Build-Test Script and Docker Image for CS350
 - build-test.sh: os161 compile routines with options for looped tests and Tmux split screen GDB debugging
 - Built while taking the CS350 Operating Systems course at University of Waterloo
 - Not under active development as of Aug 9, 2017
+- **Please ⭐ or fork if you found this repo helpful**
 
 Install
 ---
@@ -13,6 +14,7 @@ Install
   $ curl -s https://raw.githubusercontent.com/adrw/docker-os161/master/bootstrap.sh | bash -s
   ```
 - This will create folder structure, do clean install of os161, and download the `Makefile` and `build-test.sh`
+- There may be places such as in `submit.sh` that you will need to edit the file and add your username...etc
 
 Getting Started
 ---
