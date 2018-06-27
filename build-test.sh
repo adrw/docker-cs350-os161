@@ -1,4 +1,4 @@
-# By Andrew Paradi | Source at https://github.com/andrewparadi/docker-cs350-os161
+# By Andrew Paradi | Source at https://github.com/adrw/docker-cs350-os161
 #!/usr/bin/env bash
 
 # runs OS/161 in SYS/161 and attaches GDB, side by side in a tmux window
@@ -362,7 +362,7 @@ function run_test {
 }
 
 status t "Welcome to os161 built-test.sh"
-status s "Andrew Paradi. https://github.com/andrewparadi/docker-cs350-os161"
+status s "Andrew Paradi. https://github.com/adrw/docker-cs350-os161"
 status b "os161 :: ${ASSIGNMENT}"
 
 while getopts "h?:bcdmrwl:t:" opt; do

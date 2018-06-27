@@ -1,4 +1,4 @@
-# By Andrew Paradi | Source at https://github.com/andrewparadi/docker-cs350-os161
+# By Andrew Paradi | Source at https://github.com/adrw/docker-cs350-os161
 #!/usr/bin/env bash
 
 # use by ./submit {assignment #, ie. 0}

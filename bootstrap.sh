@@ -1,4 +1,4 @@
-# By Andrew Paradi | Source at https://github.com/andrewparadi/docker-cs350-os161
+# By Andrew Paradi | Source at https://github.com/adrw/docker-cs350-os161
 #!/usr/bin/env bash
 
 # set up bash to handle errors more aggressively - a "strict mode" of sorts
@@ -42,7 +42,7 @@ function safe_source {
 }
 
 status t "Welcome to docker-cs350-os161 bootstrap!"
-status s "Andrew Paradi. https://github.com/andrewparadi/docker-cs350-os161"
+status s "Andrew Paradi. https://github.com/adrw/docker-cs350-os161"
 
 mainDir=cs350-work
 srcDir=cs350-work/src
@@ -74,17 +74,17 @@ if [[ ! -x ./$srcDir ]]; then
   status b "Download os161 source code"
 fi
 
-safe_download ./$srcDir/build-test.sh https://raw.githubusercontent.com/andrewparadi/docker-cs350-os161/master/build-test.sh
+safe_download ./$srcDir/build-test.sh https://raw.githubusercontent.com/adrw/docker-cs350-os161/master/build-test.sh
 chmod +x ./$srcDir/build-test.sh
 
-safe_download ./$srcDir/submit.sh https://raw.githubusercontent.com/andrewparadi/docker-cs350-os161/master/submit.sh
+safe_download ./$srcDir/submit.sh https://raw.githubusercontent.com/adrw/docker-cs350-os161/master/submit.sh
 chmod +x ./$srcDir/submit.sh
 
 if [[ "$HOME" != /u* ]]; then
-  safe_download ./$mainDir/Makefile https://raw.githubusercontent.com/andrewparadi/docker-cs350-os161/master/Makefile
+  safe_download ./$mainDir/Makefile https://raw.githubusercontent.com/adrw/docker-cs350-os161/master/Makefile
 
   # get the prebuilt Docker image
-  docker pull andrewparadi/cs350-os161:latest
+  docker pull adrw/cs350-os161:latest
 fi
 
 status a "🍺  docker-cs350-os161 bootstrap Fin."

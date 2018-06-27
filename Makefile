@@ -1,4 +1,4 @@
-# By Andrew Paradi | Source at https://github.com/andrewparadi/docker-cs350-os161
+# By Andrew Paradi | Source at https://github.com/adrw/docker-cs350-os161
 DOCKER_COMPOSE=$(shell which docker-compose)
 DOCKER_COMPOSE_TARGETS=-f docker-compose.yml
 
@@ -14,8 +14,8 @@ default: pull
 init:
 
 build_init: init
-	bash -c "if [[ ! -f ./docker-compose.yml ]]; then wget https://raw.githubusercontent.com/andrewparadi/docker-os161/master/docker-compose.yml -O docker-compose.yml; fi"
-	bash -c "if [[ ! -f ./Dockerfile ]]; then wget https://raw.githubusercontent.com/andrewparadi/docker-os161/master/Dockerfile -O Dockerfile; fi"
+	bash -c "if [[ ! -f ./docker-compose.yml ]]; then wget https://raw.githubusercontent.com/adrw/docker-os161/master/docker-compose.yml -O docker-compose.yml; fi"
+	bash -c "if [[ ! -f ./Dockerfile ]]; then wget https://raw.githubusercontent.com/adrw/docker-os161/master/Dockerfile -O Dockerfile; fi"
 
 build: build_init
 	bash -c "$$DOCKER_NICE build"
