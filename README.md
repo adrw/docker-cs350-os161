@@ -11,7 +11,7 @@ Install
 - Login to a University of Waterloo server/terminal or install Docker on own machine
 - In Terminal, navigate to parent directory of where your os161 directory will be, then run:
   ```bash
-  $ curl -s https://raw.githubusercontent.com/adrw/docker-os161/master/bootstrap.sh | bash -s
+  $ curl -s https://raw.githubusercontent.com/adrw/docker-cs350-os161/master/bootstrap.sh | bash -s
   ```
 - This will create folder structure, do clean install of os161, and download the `Makefile` and `build-test.sh`
 - There may be places such as in `submit.sh` that you will need to edit the file and add your username...etc
